@@ -1,0 +1,48 @@
+const keyOverrides = {
+  [String.fromCharCode(160)]: ' ' // Convert non-breaking space to normal space
+};
+
+let targetCharacters = [];
+let currentIndex = 0;
+
+// Function to get the characters to type from the Typing Club lesson
+function getTargetCharacters() {
+  const elements = Array.from(document.querySelectorAll('.token span.token_unit'));
+  return elements.map(el => {
+    if (el.firstChild?.classList?.contains('_enter')) {
+      return '\n'; // Handle Enter key
+    }
+    let text = el.textContent.trim()[0] || ' '; // Handle spaces
+    return keyOverrides.hasOwnProperty(text) ? keyOverrides[text] : text;
+  });
+}
+
+// Function to simulate key recording
+function recordKey(char) {
+  if (char === ' ') {
+    window.core.record_keydown_time(' ');
+  } else if (char === '\n') {
+    window.core.record_keydown_time('\n');
+  } else {
+    window.core.record_keydown_time(char);
+  }
+}
+
+// Load the target characters for auto typing
+function loadCharacters() {
+  targetCharacters = getTargetCharacters();
+  currentIndex = 0;
+}
+
+// Keydown event listener to simulate typing
+document.addEventListener('keydown', function (event) {
+  if (currentIndex < targetCharacters.length) {
+    event.preventDefault(); // Prevent Typing Club from handling the key
+    const nextChar = targetCharacters[currentIndex];
+    recordKey(nextChar);
+    currentIndex++;
+  }
+});
+
+// Initial load of characters
+loadCharacters();
